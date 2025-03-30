@@ -7,11 +7,11 @@ import javax.swing.*;
     import java.io.FileWriter;
     import java.io.IOException;
     import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+    import java.time.LocalDate;
+    import java.time.ZoneId;
+    import java.util.ArrayList;
+    import java.util.Calendar;
+    import java.util.Date;
 
     class Users {
     String ID;
@@ -585,7 +585,7 @@ import java.util.Date;
                     if(IntAmount >= total){
                         Date currentDate = new Date();
                         Sales newSale = new Sales(ID,order,total,currentDate);
-                        sales.add(newSale);
+                        sales.add(newSale);                       
                         saveSale();
                         SwingUtilities.invokeLater(() -> Bill());
                         System.out.println(sales);
@@ -694,6 +694,8 @@ import java.util.Date;
             BCBill = new JButton("Close");
             BCBill.addActionListener(e ->{
                 window.dispose();
+                order.clear();
+                sales.clear();
                 done = true;
                 SwingUtilities.invokeLater(() -> POS());
             });
