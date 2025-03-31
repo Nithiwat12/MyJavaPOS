@@ -427,6 +427,28 @@ import java.awt.*;
             saleCount.setHorizontalAlignment(JTextField.RIGHT);
             panel_sale4.add(saleCount);
             panel_main.add(panel_sale4);
+
+            JTextArea textarea_cart = new JTextArea(10,30);
+            textarea_cart.setEditable(false);
+            textarea_cart.setLineWrap(true);
+            textarea_cart.setWrapStyleWord(true);
+
+           
+            
+
+            StringBuilder receip = new StringBuilder();
+
+            receip.append("Name :\tQuantity :\n\n");
+            for (Order o : order) {
+                receip.append(String.format("%s \t%d\n",o.nameProduct,o.countProduct));
+            }
+            textarea_cart.setText(receip.toString());
+
+            JScrollPane scrollcart = new JScrollPane(textarea_cart);
+            scrollcart.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+            scrollcart.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            scrollcart.setPreferredSize(new Dimension(350,200));
+
             BBacksale = new JButton("Back");
             BSubsale = new JButton("Submit");
             BCancelsale = new JButton("Sale");   
@@ -440,7 +462,7 @@ import java.awt.*;
             panel_B.add(BSubsale);
             panel_B.add(BCancelsale);
             panel_main.add(panel_B);
-            
+            panel_main.add(scrollcart);
             BSubsale.addActionListener(e -> {
                 String ProductName = (String) productDropdown.getSelectedItem();
                 String ProductCount = saleCount.getText();
@@ -1191,39 +1213,101 @@ import java.awt.*;
             }
         }
 
-        public void Delete_product(){
+        public void Delete_product() {
             ArrayList<Products> products = loadproduct();
-            String id = JOptionPane.showInputDialog(null,"Input File ID for delete:", "Point of Sale", JOptionPane.QUESTION_MESSAGE);
-            boolean found = false;
-            if (id == null || id.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "ID cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
-                return;//เปลี่ยนไปหน้าแรก
-            }
-
-            for (int i = 0; i < products.size(); i++) {
-                if (products.get(i).ID.equals(id)) {
-                    found = true;
-                    products.remove(i);
-                    break;//เปลี่ยนไปหน้าแรก
-                }
-            }
-
-            if (!found) {
-                JOptionPane.showMessageDialog(null, "Product ID not found!", "Error", JOptionPane.ERROR_MESSAGE);
-                return;//เปลี่ยนไปหน้าแรก
-            }
-
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME_PRODUCT))){
-                for (Products p : products) {
-                    writer.write(p.toString());
-                    writer.newLine();
-                }
-                JOptionPane.showMessageDialog(null, "Product deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                SwingUtilities.invokeLater(() -> POS());
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Error saving product data!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
             
+            
+            if (window != null) {
+                window.dispose(); 
+            }
+            window = new JFrame("Point of Sale - Delete Product");
+            window.setSize(600, 300); 
+            window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            window.setLocationRelativeTo(null);
+        
+            JPanel panel_main = new JPanel(new BorderLayout(10, 20));
+            panel_main.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+            JPanel formPanel = new JPanel();
+            formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
+        
+            
+            JPanel panel_SelectProduct = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JLabel label_SelectProduct = new JLabel("Select Product to Delete: ");
+            JComboBox<String> productComboBox = new JComboBox<>(products.stream().map(Products::getName).toArray(String[]::new));
+            productComboBox.setPreferredSize(new Dimension(350, 30));
+            panel_SelectProduct.add(label_SelectProduct);
+            panel_SelectProduct.add(productComboBox);
+        
+            formPanel.add(panel_SelectProduct);
+            formPanel.add(Box.createVerticalStrut(30));
+        
+           
+            JPanel panel_Buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton deleteButton = new JButton("Delete");
+            JButton cancelButton = new JButton("Cancel");
+            panel_Buttons.add(cancelButton);
+            panel_Buttons.add(deleteButton);
+        
+           
+            cancelButton.addActionListener(e -> {
+                window.dispose();
+                SwingUtilities.invokeLater(() -> POS());
+            });
+        
+            
+            deleteButton.addActionListener(e -> {
+                String selectedProduct = (String) productComboBox.getSelectedItem();
+                
+                if (selectedProduct == null || selectedProduct.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Please select a product!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+        
+                
+                int confirm = JOptionPane.showConfirmDialog(null, 
+                    "Are you sure you want to delete '" + selectedProduct + "'?", 
+                    "Confirm Delete", JOptionPane.YES_NO_OPTION);
+                
+                if (confirm != JOptionPane.YES_OPTION) {
+                    return;
+                }
+        
+               
+                boolean found = false;
+                for (int i = 0; i < products.size(); i++) {
+                    if (products.get(i).getName().equals(selectedProduct)) {
+                        products.remove(i);
+                        found = true;
+                        break;
+                    }
+                }
+        
+                if (!found) {
+                    JOptionPane.showMessageDialog(null, "Product not found in database!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+        
+                
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME_PRODUCT))) {
+                    for (Products p : products) {
+                        writer.write(p.toString());
+                        writer.newLine();
+                    }
+                    JOptionPane.showMessageDialog(null, "Product deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    window.dispose();
+                    SwingUtilities.invokeLater(() -> POS());
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Error saving product data!", "Error", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                }
+            });
+        
+            panel_main.add(formPanel, BorderLayout.CENTER);
+            panel_main.add(panel_Buttons, BorderLayout.SOUTH);
+        
+            window.add(panel_main);
+            window.setVisible(true);
         }
 
         public void Edit_product(){
