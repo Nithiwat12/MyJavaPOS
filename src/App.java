@@ -224,7 +224,9 @@ import javax.swing.*;
                         dailyTotal += sale.Totalprice;
                         
                         String customerName = sale.ID.isEmpty() ? "Guest" : getCustomerName(sale.ID);
-                        
+                        if(sale.ID.isEmpty()){
+                            sale.ID = "No Member";
+                        }
                         report.append(String.format("%-15s %-20s %-15d %-15d %-15s\n",  
                             sale.ID,
                             timeFormat.format(sale.currentDate),
@@ -582,7 +584,9 @@ import javax.swing.*;
                 try {
                     IntAmount = Integer.parseInt(amount);
                     String ID = saleID.getText();
+
                     if(IntAmount >= total){
+
                         Date currentDate = new Date();
                         Sales newSale = new Sales(ID,order,total,currentDate);
                         sales.add(newSale);                       
