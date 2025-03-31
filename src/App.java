@@ -56,6 +56,9 @@ import java.awt.*;
         public int setStock(int stock){
             return this.Stock = stock;
         }
+        public String setName(String name){
+            return this.Name = name;
+        }
         }
     class Sales {
         String ID;
@@ -1248,7 +1251,14 @@ import java.awt.*;
             panel_EditProduct.add(label_EditProduct);
             panel_EditProduct.add(EditProduct);
 
-           
+            JPanel panel_editname = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JLabel label_editname = new JLabel("Enter New Name: ");
+            JTextField EditName = new JTextField(15);
+            EditName.setPreferredSize(new Dimension(350, 30));
+            panel_editname.add(label_editname);
+            panel_editname.add(EditName);
+            
+
             panel_editprice = new JPanel(new FlowLayout(FlowLayout.LEFT));
             label_editprice = new JLabel("Enter New Price: ");
             EditPrice = new JTextField(15);
@@ -1266,6 +1276,8 @@ import java.awt.*;
 
             
             formPanel.add(panel_EditProduct);
+            formPanel.add(Box.createVerticalStrut(15));
+            formPanel.add(panel_editname);
             formPanel.add(Box.createVerticalStrut(15));
             formPanel.add(panel_editprice);
             formPanel.add(Box.createVerticalStrut(15));
@@ -1286,7 +1298,7 @@ import java.awt.*;
                 String productName = (String) EditProduct.getSelectedItem();
                 String priceText = EditPrice.getText().trim();
                 String stockText = EditStock.getText().trim();
-            
+                String name = EditName.getText().trim();
                 
                 if (productName == null || productName.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Please select a product!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -1311,7 +1323,7 @@ import java.awt.*;
                         if (p.getName().equals(productName)) {
                             p.setPrice(price);
                             p.setStock(stock);
-
+                            p.setName(name);
                             productFound = true;
                             
                             break;
@@ -1367,8 +1379,7 @@ import java.awt.*;
 
 
 
-    public void saveSale(){
-      
+    public void saveSale(){  
         File file = new File(FILE_SALE);
         try {
             if (!file.exists()) {
