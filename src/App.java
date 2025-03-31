@@ -14,6 +14,9 @@ import java.awt.*;
     import java.util.ArrayList;
     import java.util.Calendar;
     import java.util.Date;
+    import java.util.Map;
+    import java.util.Objects;
+    import java.util.stream.Collectors;
 
     class Users {
     String ID;
@@ -60,40 +63,43 @@ import java.awt.*;
             return this.Name = name;
         }
         }
-    class Sales {
-        String ID;
-        ArrayList<Order> order;
-        int Totalprice;
-        Date currentDate;
-        public Sales(String ID,ArrayList<Order> order,int Totalprice,Date currentDate){
-            this.ID = ID;
-            this.order = order;
-            this.Totalprice = Totalprice;
-            this.currentDate = currentDate;
-        }
-        @Override
-        public String toString() {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            StringBuilder ordersStr = new StringBuilder();
-            for (Order o : order) {
-                ordersStr.append(o.nameProduct).append(";")
-                         .append(o.countProduct).append(";")
-                         .append(o.price).append("|");
+        class Sales {
+            String ID;
+            ArrayList<Order> order;
+            int Totalprice;
+            Date currentDate;
+            public Sales(String ID,ArrayList<Order> order,int Totalprice,Date currentDate){
+                this.ID = ID;
+                this.order = order;
+                this.Totalprice = Totalprice;
+                this.currentDate = currentDate;
             }
-            
-            if (ordersStr.length() > 0) {
-                ordersStr.setLength(ordersStr.length() - 1);
+            @Override
+            public String toString() {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                StringBuilder ordersStr = new StringBuilder();
+                for (Order o : order) {
+                    ordersStr.append(o.nameProduct).append(";")
+                            .append(o.countProduct).append(";")
+                            .append(o.price).append("|");
+                }
+                
+                if (ordersStr.length() > 0) {
+                    ordersStr.setLength(ordersStr.length() - 1);
+                }
+                return ID + "||" + ordersStr.toString() + "||" + Totalprice + "||" + dateFormat.format(currentDate);
             }
-            return ID + "||" + ordersStr.toString() + "||" + Totalprice + "||" + dateFormat.format(currentDate);
-        }
 
-        public ArrayList<Order> getOrders() {
-            return order;
+            public ArrayList<Order> getOrders() {
+                return order;
+            }
+            public void setSaleDate(Date saleDate) {
+                this.currentDate = saleDate;
+            }
+            public Date getDate(){
+                return currentDate;
+            }
         }
-        public void setSaleDate(Date saleDate) {
-            this.currentDate = saleDate;
-        }
-    }
 
     class Order{
         String nameProduct;
@@ -176,7 +182,7 @@ import java.awt.*;
                 done = false;
             }
             else if(choice.equals("5")){
-                DayOfSale();
+                Date();
                 done = false;
             }
             else if(choice.equals("6")){
@@ -190,7 +196,7 @@ import java.awt.*;
             else{
                 String alert = "No this choice, please input again";
                 JOptionPane.showMessageDialog(null, alert, "Message", JOptionPane.INFORMATION_MESSAGE);
-                done = false;
+                done = true;
             }
             }
         }
@@ -242,98 +248,170 @@ import java.awt.*;
             window.setVisible(true);
 }
 
-
-
-        public void DayOfSale() {
-            ArrayList<Sales> salesList = loadsale();
-            System.out.println(salesList);
-            window = new JFrame("Daily Sales Report");
-            window.setSize(800, 600);
-            window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            window.setLocationRelativeTo(null);
-
-            JPanel panel_main = new JPanel(new BorderLayout());
-            panel_main.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-            JTextArea reportArea = new JTextArea();
-            reportArea.setEditable(false);
-            reportArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-            JScrollPane scrollPane = new JScrollPane(reportArea);
-
-            StringBuilder report = new StringBuilder();
-            
-            LocalDate today = LocalDate.now();
-            report.append(String.format("%50s\n", "DAILY SALES REPORT"));
-            report.append(String.format("%50s\n", "Date: " + today));
-            report.append(String.format("%50s\n\n", "=============================="));
-            
-            if (salesList.isEmpty()) {
-                report.append("No sales data available.\n");
-            } else {
-                double dailyTotal = 0;
-                int totalTransactions = 0;
-                int totalItemsSold = 0;
-
-                SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+            public void Date() {
+                ArrayList<Sales> salesList = loadsale();
                 
-                report.append(String.format("%-15s %-20s %-15s %-15s %-15s\n", 
-                    "Sale ID", "Time", "Items Sold", "Total Amount", "Customer"));
-                report.append(String.format("%-15s %-20s %-15s %-15s %-15s\n", 
-                    "-------", "----", "---------", "------------", "--------"));
+                window = new JFrame("Daily Sales Report");
+                window.setSize(400, 200); 
+                window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                window.setLocationRelativeTo(null);
+                
+                JPanel panelMain = new JPanel(new BorderLayout());
+                JPanel panelSelectDate = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                JPanel panelButtons = new JPanel(new FlowLayout(FlowLayout.CENTER));
+                
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                
 
-                for (Sales sale : salesList) {
-                    LocalDate saleDate = sale.currentDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                String[] dateStrings = salesList.stream()
+                        .map(Sales::getDate) 
+                        .filter(Objects::nonNull) 
+                        .map(dateFormat::format)
+                        .distinct()  
+                        .sorted()    
+                        .toArray(String[]::new);
+                
+               
+                Map<String, Date> dateMap = salesList.stream()
+                        .map(Sales::getDate)
+                        .filter(Objects::nonNull)
+                        .distinct()
+                        .collect(Collectors.toMap(
+                            dateFormat::format,
+                            date -> date,
+                            (existing, replacement) -> existing  
+                        ));
+                
+                JLabel labelSelectDate = new JLabel("Select Date: ");
+                JComboBox<String> dateComboBox = new JComboBox<>(dateStrings);
+                dateComboBox.setPreferredSize(new Dimension(150, 30));
+                
+                panelSelectDate.add(labelSelectDate);
+                panelSelectDate.add(dateComboBox);
+                
+                JButton BNext = new JButton("Next");
+                JButton BBack = new JButton("Back");
+                
+                BNext.addActionListener(e -> {
+                    String selectedDateStr = (String) dateComboBox.getSelectedItem();
+                    Date selectedDate = dateMap.get(selectedDateStr);
                     
-                    if (saleDate.equals(today)) {
-                        totalTransactions++;
-                        int itemsInSale = sale.getOrders().stream().mapToInt(o -> o.countProduct).sum();
-                        totalItemsSold += itemsInSale;
-                        dailyTotal += sale.Totalprice;
+                    if (selectedDate != null) {
                         
-                        String customerName = sale.ID.isEmpty() ? "Guest" : getCustomerName(sale.ID);
-                        if(sale.ID.isEmpty()){
-                            sale.ID = "No Member";
-                        }
-                        report.append(String.format("%-15s %-20s %-15d %-15d %-15s\n",  
-                            sale.ID,
-                            timeFormat.format(sale.currentDate),
-                            itemsInSale,
-                            sale.Totalprice, 
-                            customerName));
-
+                        LocalDate localDate = selectedDate.toInstant()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toLocalDate();
+                        
+                       
+                        window.dispose();
+                        DayOfSale(localDate);
+                    } else {
+                        JOptionPane.showMessageDialog(window, "Please select a valid date");
                     }
-        }
-
-        if (totalTransactions == 0) {
-            report.append("\nNo sales recorded for today.\n");
-        } else {
-            report.append("\n");
-            report.append(String.format("%-15s %-20s %-15s %-15s\n", "", "", "-------------", "-------------"));
-            report.append(String.format("%-15s %-20s %-15d %-15.2f THB\n", 
-                "", "DAILY TOTAL:", totalItemsSold, dailyTotal));
-            report.append(String.format("%-35s %15s\n", "", "=============="));
-            report.append(String.format("%-35s %15d %s\n", "Total Transactions:", totalTransactions, "transactions"));
-        }
+                });
+                
+                BBack.addActionListener(e -> {
+                    window.dispose();
+                    SwingUtilities.invokeLater(() -> POS());
+                });
+                
+                panelButtons.add(BBack);
+                panelButtons.add(BNext);
+                
+                panelMain.add(panelSelectDate, BorderLayout.CENTER);
+                panelMain.add(panelButtons, BorderLayout.SOUTH);
+                window.add(panelMain);
+                window.setVisible(true);
     }
 
-    reportArea.setText(report.toString());
+    public void DayOfSale(LocalDate selectedDate) {
+        ArrayList<Sales> salesList = loadsale();
+        System.out.println(salesList);
+        window = new JFrame("Daily Sales Report");
+        window.setSize(800, 600);
+        window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        window.setLocationRelativeTo(null);
 
-    JButton closeButton = new JButton("Close");
-    closeButton.addActionListener(e -> {
-        window.dispose();
-        done = true;
-        SwingUtilities.invokeLater(() -> POS());
-    });
+        JPanel panel_main = new JPanel(new BorderLayout());
+        panel_main.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-    JPanel buttonPanel = new JPanel();
-    buttonPanel.add(closeButton);
+        JTextArea reportArea = new JTextArea();
+        reportArea.setEditable(false);
+        reportArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        JScrollPane scrollPane = new JScrollPane(reportArea);
 
-    panel_main.add(scrollPane, BorderLayout.CENTER);
-    panel_main.add(buttonPanel, BorderLayout.SOUTH);
+        StringBuilder report = new StringBuilder();
+        
+        report.append(String.format("%50s\n", "DAILY SALES REPORT"));
+        report.append(String.format("%50s\n", "Date: " + selectedDate));
+        report.append(String.format("%50s\n\n", "=============================="));
+        
+        if (salesList.isEmpty()) {
+            report.append("No sales data available.\n");
+        } else {
+            double dailyTotal = 0;
+            int totalTransactions = 0;
+            int totalItemsSold = 0;
 
-    window.add(panel_main);
-    window.setVisible(true);
-}
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+            
+            report.append(String.format("%-15s %-20s %-15s %-15s %-15s\n", 
+                "Sale ID", "Time", "Items Sold", "Total Amount", "Customer"));
+            report.append(String.format("%-15s %-20s %-15s %-15s %-15s\n", 
+                "-------", "----", "---------", "------------", "--------"));
+
+            for (Sales sale : salesList) {
+                LocalDate saleDate = sale.currentDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                
+                if (saleDate.equals(selectedDate)) {
+                    totalTransactions++;
+                    int itemsInSale = sale.getOrders().stream().mapToInt(o -> o.countProduct).sum();
+                    totalItemsSold += itemsInSale;
+                    dailyTotal += sale.Totalprice;
+                    
+                    String customerName = sale.ID.isEmpty() ? "Guest" : getCustomerName(sale.ID);
+                    if(sale.ID.isEmpty()){
+                        sale.ID = "No Member";
+                    }
+                    report.append(String.format("%-15s %-20s %-15d %-15d %-15s\n",  
+                        sale.ID,
+                        timeFormat.format(sale.currentDate),
+                        itemsInSale,
+                        sale.Totalprice, 
+                        customerName));
+                }
+            }
+
+            if (totalTransactions == 0) {
+                report.append("\nNo sales recorded for selected date.\n");
+            } else {
+                report.append("\n");
+                report.append(String.format("%-15s %-20s %-15s %-15s\n", "", "", "-------------", "-------------"));
+                report.append(String.format("%-15s %-20s %-15d %-15.2f THB\n", 
+                    "", "DAILY TOTAL:", totalItemsSold, dailyTotal));
+                report.append(String.format("%-35s %15s\n", "", "=============="));
+                report.append(String.format("%-35s %15d %s\n", "Total Transactions:", totalTransactions, "transactions"));
+            }
+        }
+
+        reportArea.setText(report.toString());
+
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> {
+            window.dispose();
+            done = true;
+            SwingUtilities.invokeLater(() -> POS());
+        });
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(closeButton);
+
+        panel_main.add(scrollPane, BorderLayout.CENTER);
+        panel_main.add(buttonPanel, BorderLayout.SOUTH);
+
+        window.add(panel_main);
+        window.setVisible(true);
+    }
         
         
         private String getCustomerName(String customerId) {
