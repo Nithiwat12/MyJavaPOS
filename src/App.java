@@ -214,7 +214,11 @@ import java.awt.*;
                     3. Exit\n
                     """;
             String choice = JOptionPane.showInputDialog(null, Menu, "Point of Sale", JOptionPane.QUESTION_MESSAGE);
-
+            if (choice == null) {
+                done = true;
+                SwingUtilities.invokeLater(() -> POS());
+                return;
+            }
             if(choice.equals("1")){
                 showProduct();
             }
@@ -229,6 +233,7 @@ import java.awt.*;
                 String alert = "No this choice, please input again";
                 JOptionPane.showMessageDialog(null, alert, "Message", JOptionPane.INFORMATION_MESSAGE);
                 done = true;
+                SwingUtilities.invokeLater(() -> POS());
             }
         }
         public void showProduct(){
@@ -1013,7 +1018,8 @@ import java.awt.*;
                 done = true;
                 SwingUtilities.invokeLater(() -> POS());
             });
-    
+            BpanelProduct.add(BProduct);
+            BpanelProduct.add(BCProduct);
             textarea_product = new JTextArea(10, 30);
             textarea_product.setEditable(false);
             textarea_product.setLineWrap(true);
@@ -1048,7 +1054,7 @@ import java.awt.*;
             panel_main.add(Box.createRigidArea(new Dimension(0, 5)));
             panel_main.add(panel_product4);
             panel_main.add(Box.createRigidArea(new Dimension(0, 10)));
-            panel_main.add(BProduct);
+            panel_main.add(BpanelProduct);
             panel_main.add(Box.createRigidArea(new Dimension(0, 10)));
             panel_main.add(scrollPane);
             
