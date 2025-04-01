@@ -28,6 +28,7 @@ import java.awt.*;
         this.Name = Name;
     }
     @Override
+    
         public String toString() {
             return ID + "," + Name;
         }
@@ -38,6 +39,7 @@ import java.awt.*;
             return this.Name = name;
         }
     }
+
     class Products{
         String ID;
         String Name;
@@ -1376,7 +1378,9 @@ import java.awt.*;
                     boolean productFound = false;
                     for (Users p : members) {
                         if (p.getName().equals(productName)) {
+                           if(!name.isEmpty()){
                             p.setName(name);
+                           }
                             productFound = true;
                             
                             break;
