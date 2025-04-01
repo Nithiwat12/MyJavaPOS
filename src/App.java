@@ -31,7 +31,12 @@ import java.awt.*;
         public String toString() {
             return ID + "," + Name;
         }
-
+        public String getName(){
+            return Name;
+        }
+        public String setName(String name){
+            return this.Name = name;
+        }
     }
     class Products{
         String ID;
@@ -152,7 +157,7 @@ import java.awt.*;
                     3. Sales (Customer)\n
                     4. Register Member (Customer)\n
                     5. Report Sale of Day\n
-                    6. Show Member\n
+                    6. Show Data\n
                     7. Exit\n
                     """;
             String choice = JOptionPane.showInputDialog(null, Menu, "Point of Sale", JOptionPane.QUESTION_MESSAGE);
@@ -186,7 +191,7 @@ import java.awt.*;
                 done = false;
             }
             else if(choice.equals("6")){
-                showMember();
+                choiceShow();
                 done = false;
             }
             else if(choice.equals("7")){
@@ -200,10 +205,77 @@ import java.awt.*;
             }
             }
         }
+        public void choiceShow(){
+            String Menu = """
+                    1. Show Product \n 
+                    2. Show Members \n
+                    3. Exit\n
+                    """;
+            String choice = JOptionPane.showInputDialog(null, Menu, "Point of Sale", JOptionPane.QUESTION_MESSAGE);
+
+            if(choice.equals("1")){
+                showProduct();
+            }
+            else if(choice.equals("2")){
+                showMember();
+            }
+            else if(choice.equals("3")){
+                done = true;
+                SwingUtilities.invokeLater(() -> POS());
+            }
+            else{
+                String alert = "No this choice, please input again";
+                JOptionPane.showMessageDialog(null, alert, "Message", JOptionPane.INFORMATION_MESSAGE);
+                done = true;
+            }
+        }
+        public void showProduct(){
+            ArrayList<Products> products = loadproduct();
+            window = new JFrame("Product List");
+            window.setSize(600, 400);
+            window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            window.setLocationRelativeTo(null);
+
+            JPanel panel_main = new JPanel(new BorderLayout());
+            panel_main.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+            
+            String[] columnNames = {"Products ID", "Products Name","Products price","Products stock"};
+            DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+
+            for (Products u : products) {
+                model.addRow(new Object[]{u.ID, u.Name, u.price, u.Stock});
+            }
+
+            JTable table = new JTable(model);
+            table.setFont(new Font("SansSerif", Font.PLAIN, 14));
+            table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
+            table.setRowHeight(25);
+            table.setAutoCreateRowSorter(true);
+            
+            JScrollPane scrollPane = new JScrollPane(table);
+
+        
+            JButton closeButton = new JButton("Close");
+            closeButton.addActionListener(e -> {
+                window.dispose();
+                done = true;
+                SwingUtilities.invokeLater(() -> POS());
+            });
+
+            JPanel buttonPanel = new JPanel();
+            buttonPanel.add(closeButton);
+
+            panel_main.add(scrollPane, BorderLayout.CENTER);
+            panel_main.add(buttonPanel, BorderLayout.SOUTH);
+
+            window.add(panel_main);
+            window.setVisible(true);
+        }
 
         public void showMember() {
             ArrayList<Users> members = loadMember();
-            
+            done = false;
             window = new JFrame("Member List");
             window.setSize(600, 400);
             window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -997,17 +1069,23 @@ import java.awt.*;
             
             if (id.isEmpty() || name.isEmpty() || priceText.isEmpty()|| stockText.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Please fill all fields!", "Error", JOptionPane.ERROR_MESSAGE);
+                SwingUtilities.invokeLater(() -> POS());
                 return;
             }
             
             if (product == null) {
                 product = new ArrayList<>();
+                SwingUtilities.invokeLater(() -> POS());
+                done = true;
             }
         
 
             for (Products p : products) {
                 if (p.ID.equals(id)) {
                     JOptionPane.showMessageDialog(null, "Product ID already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+                    SwingUtilities.invokeLater(() -> POS());
+                    done = true;
+
                     return;
                 }
             }
@@ -1019,6 +1097,8 @@ import java.awt.*;
                     stock = Integer.parseInt(stockText);
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(null, "Invalid price or stock format!", "Error", JOptionPane.ERROR_MESSAGE);
+                    SwingUtilities.invokeLater(() -> POS());
+                    done = true;
                     return;
                 }
             
@@ -1030,6 +1110,8 @@ import java.awt.*;
                     }
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(null, "Error creating file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    SwingUtilities.invokeLater(() -> POS());
+                    done = true;
                     return;
                 }
             
@@ -1056,11 +1138,15 @@ import java.awt.*;
                         POS();
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(null, "Error in POS(): " + ex, "Error", JOptionPane.ERROR_MESSAGE);
+                        SwingUtilities.invokeLater(() -> POS());
+                        done = true;
                     }
                 });
             
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Unexpected error: " + e, "Error", JOptionPane.ERROR_MESSAGE);
+                SwingUtilities.invokeLater(() -> POS());
+                done = true;
             }
 
     
@@ -1192,6 +1278,7 @@ import java.awt.*;
                     2. Delete Product (Admin)\n
                     3. Edit Member\n
                     4. Delete Member\n
+                    5. Exit \n
                     """;
             String choice = JOptionPane.showInputDialog(null, Menu, "Point of Sale", JOptionPane.QUESTION_MESSAGE);
             if(choice == null){
@@ -1213,7 +1300,9 @@ import java.awt.*;
                 Delete_Member();
             }
             else if(choice.equals("5")){
+                done = true;
                 SwingUtilities.invokeLater(() -> POS());
+                return;
             }
             else{
                 JOptionPane.showMessageDialog(null, "Cannoy choice", "Error", JOptionPane.ERROR_MESSAGE);
@@ -1222,73 +1311,221 @@ import java.awt.*;
         }
         public void Edit_Member(){
             ArrayList<Users> members = loadMember();
-            String id = JOptionPane.showInputDialog(null,"Input File ID for edit:", "Point of Sale", JOptionPane.QUESTION_MESSAGE);
-            boolean found = false;
-            if (id == null || id.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "ID cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
-                return; //เปลี่ยนไปหน้าแรก
-            }
-
-            for (Users u : members) {
-                if(u.ID.equals(id)){
-                    found = true;
-                    String newName = JOptionPane.showInputDialog(null,"Input New Name :", "Point of Sale", JOptionPane.QUESTION_MESSAGE);
-                if(!u.Name.equals(newName)){
-                    u.Name = newName;
-                }else{
-                    JOptionPane.showMessageDialog(null, "Name is used", "Error", JOptionPane.ERROR_MESSAGE);
-                    break;//เปลี่ยนไปหน้าแรก
-                }
-                if (!found) {
-                    JOptionPane.showMessageDialog(null, "User ID not found!", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;//เปลี่ยนไปหน้าแรก
-                }
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_USER))) {
-                    for (Users users : members) {
-                        writer.write(users.toString());
-                        writer.newLine();
-                    }
-                    JOptionPane.showMessageDialog(null, "User updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                } catch (IOException e) {
-                    JOptionPane.showMessageDialog(null, "Error saving product data!", "Error", JOptionPane.ERROR_MESSAGE);
-                }
+            if (window != null) {
+                window.dispose(); 
                 SwingUtilities.invokeLater(() -> POS());
-                
-                }
-                
+                done = true;
             }
+             window = new JFrame("Point of Sale - Edit Member");
+            window.setSize(600, 400); 
+            window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            window.setLocationRelativeTo(null);
+
+           
+            JPanel panel_main = new JPanel(new BorderLayout(10, 20));
+            panel_main.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+            JPanel formPanel = new JPanel();
+            formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
+
+           
+            panel_EditProduct = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            label_EditProduct = new JLabel("Select Members: ");
+            EditProduct = new JComboBox<>(members.stream().map(Users::getName).toArray(String[]::new));
+            EditProduct.setPreferredSize(new Dimension(350, 30));
+            panel_EditProduct.add(label_EditProduct);
+            panel_EditProduct.add(EditProduct);
+
+            JPanel panel_editname = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JLabel label_editname = new JLabel("Enter New Name: ");
+            JTextField EditName = new JTextField(15);
+            EditName.setPreferredSize(new Dimension(350, 30));
+            panel_editname.add(label_editname);
+            panel_editname.add(EditName);
+
+            formPanel.add(panel_EditProduct);
+            formPanel.add(Box.createVerticalStrut(15));
+            formPanel.add(panel_editname);
+            formPanel.add(Box.createVerticalStrut(15));
+
             
+            panel_BEdit = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            BSEdit = new JButton("Submit");
+            BCEdit = new JButton("Cancel");
+            panel_BEdit.add(BCEdit);
+            panel_BEdit.add(BSEdit);  
+            BCEdit.addActionListener(e -> {
+                window.dispose();
+                done = true;
+                SwingUtilities.invokeLater(() -> POS());
+            });
+            BSEdit.addActionListener(e -> {
+                String productName = (String) EditProduct.getSelectedItem();
+                String name = EditName.getText().trim();
+                
+                if (productName == null || productName.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Please select a product!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            
+
+                  
+            
+                    
+                    boolean productFound = false;
+                    for (Users p : members) {
+                        if (p.getName().equals(productName)) {
+                            p.setName(name);
+                            productFound = true;
+                            
+                            break;
+                        }
+                    }
+            
+                    if (!productFound) {
+                        JOptionPane.showMessageDialog(null, "Members not found in database!", 
+                                                   "Error", JOptionPane.ERROR_MESSAGE);
+                                                   SwingUtilities.invokeLater(() -> POS());
+                                                   done = true;
+                        return;
+                    }
+            
+  
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_USER))) {
+                        for (Users p : members) {
+                            writer.write(p.toString());
+                            writer.newLine();
+                        }
+                        JOptionPane.showMessageDialog(null, "Members updated successfully!", 
+                                                   "Success", JOptionPane.INFORMATION_MESSAGE);
+                                                   SwingUtilities.invokeLater(() -> POS());
+                                                   done = true;        
+                        
+
+                        window.dispose();
+                        SwingUtilities.invokeLater(() -> POS());
+                        
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(null, "Error saving Members data: " + ex.getMessage(), 
+                                                   "Error", JOptionPane.ERROR_MESSAGE);
+                        ex.printStackTrace();
+                    }
+            
+               
+                catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "An unexpected error occurred: " + ex.getMessage(), 
+                                               "Error", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                }
+            });
+           
+            panel_main.add(formPanel, BorderLayout.CENTER);
+            panel_main.add(panel_BEdit, BorderLayout.SOUTH);
+
+            
+            window.add(panel_main);
+            window.setVisible(true);
+
         }
         public void Delete_Member(){
             ArrayList<Users> members = loadMember();
-            String id = JOptionPane.showInputDialog(null,"Input File ID for delete:", "Point of Sale", JOptionPane.QUESTION_MESSAGE);
-            boolean found = false;
-        
-            if (id == null || id.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "ID cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
-                return;//เปลี่ยนไปหน้าแรก
-            }
-            for (int i = 0; i < members.size(); i++) {
-                if (members.get(i).ID.equals(id)) {
-                    found = true;
-                    members.remove(i);
-                    break;//เปลี่ยนไปหน้าแรก
-                }
-            }
-            if (!found) {
-                JOptionPane.showMessageDialog(null, "User ID not found!", "Error", JOptionPane.ERROR_MESSAGE);
-                return;//เปลี่ยนไปหน้าแรก
-            }
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_USER))){
-                for (Users users : members) {
-                    writer.write(users.toString());
-                    writer.newLine();
-                }
-                JOptionPane.showMessageDialog(null, "User deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            if (window != null) {
+                window.dispose(); 
                 SwingUtilities.invokeLater(() -> POS());
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Error saving User data!", "Error", JOptionPane.ERROR_MESSAGE);
+                done = true;
             }
+            window = new JFrame("Point of Sale - Delete Member");
+            window.setSize(600, 300); 
+            window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            window.setLocationRelativeTo(null);
+
+            JPanel panel_main = new JPanel(new BorderLayout(10, 20));
+            panel_main.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            JPanel formPanel = new JPanel();
+            formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
+            JPanel panel_SelectProduct = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JLabel label_SelectProduct = new JLabel("Select Product to Delete: ");
+            JComboBox<String> productComboBox = new JComboBox<>(members.stream().map(Users::getName).toArray(String[]::new));
+            productComboBox.setPreferredSize(new Dimension(350, 30));
+            panel_SelectProduct.add(label_SelectProduct);
+            panel_SelectProduct.add(productComboBox);
+
+            formPanel.add(panel_SelectProduct);
+            formPanel.add(Box.createVerticalStrut(30));
+        
+           
+            JPanel panel_Buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton deleteButton = new JButton("Delete");
+            JButton cancelButton = new JButton("Cancel");
+            panel_Buttons.add(cancelButton);
+            panel_Buttons.add(deleteButton);
+        
+           
+            cancelButton.addActionListener(e -> {
+                window.dispose();
+                SwingUtilities.invokeLater(() -> POS());
+            });
+        
+
+            deleteButton.addActionListener(e -> {
+                String selectedProduct = (String) productComboBox.getSelectedItem();
+                
+                if (selectedProduct == null || selectedProduct.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Please select a product!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+        
+                
+                int confirm = JOptionPane.showConfirmDialog(null, 
+                    "Are you sure you want to delete '" + selectedProduct + "'?", 
+                    "Confirm Delete", JOptionPane.YES_NO_OPTION);
+                
+                if (confirm != JOptionPane.YES_OPTION) {
+                    SwingUtilities.invokeLater(() -> POS());
+                    done = true;
+                    return;
+                }
+        
+               
+                boolean found = false;
+                for (int i = 0; i < members.size(); i++) {
+                    if (members.get(i).getName().equals(selectedProduct)) {
+                        members.remove(i);
+                        found = true;
+                        break;
+                    }
+                }
+        
+                if (!found) {
+                    JOptionPane.showMessageDialog(null, "Product not found in database!", "Error", JOptionPane.ERROR_MESSAGE);
+                    SwingUtilities.invokeLater(() -> POS());
+                    done = true;
+                    return;
+                }
+        
+                
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_USER))) {
+                    for (Users p : members) {
+                        writer.write(p.toString());
+                        writer.newLine();
+                    }
+                    JOptionPane.showMessageDialog(null, "Product deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    window.dispose();
+                    SwingUtilities.invokeLater(() -> POS());
+                    done = true;
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Error saving product data!", "Error", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                    SwingUtilities.invokeLater(() -> POS());
+                    done = true;
+                }
+            });
+        
+            panel_main.add(formPanel, BorderLayout.CENTER);
+            panel_main.add(panel_Buttons, BorderLayout.SOUTH);
+        
+            window.add(panel_main);
+            window.setVisible(true);
         }
 
         public void Delete_product() {
@@ -1297,6 +1534,8 @@ import java.awt.*;
             
             if (window != null) {
                 window.dispose(); 
+                SwingUtilities.invokeLater(() -> POS());
+                done = true;
             }
             window = new JFrame("Point of Sale - Delete Product");
             window.setSize(600, 300); 
@@ -1348,6 +1587,8 @@ import java.awt.*;
                     "Confirm Delete", JOptionPane.YES_NO_OPTION);
                 
                 if (confirm != JOptionPane.YES_OPTION) {
+                    SwingUtilities.invokeLater(() -> POS());
+                    done = true;
                     return;
                 }
         
@@ -1363,6 +1604,8 @@ import java.awt.*;
         
                 if (!found) {
                     JOptionPane.showMessageDialog(null, "Product not found in database!", "Error", JOptionPane.ERROR_MESSAGE);
+                    SwingUtilities.invokeLater(() -> POS());
+                    done = true;
                     return;
                 }
         
@@ -1375,9 +1618,12 @@ import java.awt.*;
                     JOptionPane.showMessageDialog(null, "Product deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                     window.dispose();
                     SwingUtilities.invokeLater(() -> POS());
+                    done = true;
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Error saving product data!", "Error", JOptionPane.ERROR_MESSAGE);
                     ex.printStackTrace();
+                    SwingUtilities.invokeLater(() -> POS());
+                    done = true;
                 }
             });
         
@@ -1392,6 +1638,8 @@ import java.awt.*;
             ArrayList<Products> products = loadproduct();
             if (window != null) {
                 window.dispose(); 
+                SwingUtilities.invokeLater(() -> POS());
+                done = true;
             }
              window = new JFrame("Point of Sale - Edit Product");
             window.setSize(600, 400); 
@@ -1460,46 +1708,65 @@ import java.awt.*;
                 String productName = (String) EditProduct.getSelectedItem();
                 String priceText = EditPrice.getText().trim();
                 String stockText = EditStock.getText().trim();
-                String name = EditName.getText().trim();
+                String nameText = EditName.getText().trim();
+        
                 
                 if (productName == null || productName.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Please select a product!", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Please select a product to edit!", 
+                                               "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-            
+        
                 try {
-                    int price = Integer.parseInt(priceText);
-                    int stock = Integer.parseInt(stockText);
                     
+                    Integer price = null;
+                    Integer stock = null;
                     
-                    if (price <= 0 || stock < 0) {
-                        JOptionPane.showMessageDialog(null, "Price must be positive and stock cannot be negative!", 
-                                                   "Invalid Input", JOptionPane.ERROR_MESSAGE);
-                                                   SwingUtilities.invokeLater(() -> POS());
-                        return;
+                    if (!priceText.isEmpty()) {
+                        price = Integer.parseInt(priceText);
+                        if (price <= 0) {
+                            JOptionPane.showMessageDialog(null, "Price must be positive!", 
+                                                       "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
                     }
-            
+                    
+                    if (!stockText.isEmpty()) {
+                        stock = Integer.parseInt(stockText);
+                        if (stock < 0) {
+                            JOptionPane.showMessageDialog(null, "Stock cannot be negative!", 
+                                                       "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                    }
+        
                     
                     boolean productFound = false;
                     for (Products p : products) {
                         if (p.getName().equals(productName)) {
-                            p.setPrice(price);
-                            p.setStock(stock);
-                            p.setName(name);
-                            productFound = true;
                             
+                            if (!nameText.isEmpty()) {
+                                p.setName(nameText);
+                            }
+                            if (price != null) {
+                                p.setPrice(price);
+                            }
+                            if (stock != null) {
+                                p.setStock(stock);
+                            }
+                            
+                            productFound = true;
                             break;
                         }
                     }
-            
+        
                     if (!productFound) {
                         JOptionPane.showMessageDialog(null, "Product not found in database!", 
                                                    "Error", JOptionPane.ERROR_MESSAGE);
-                                                   SwingUtilities.invokeLater(() -> POS());
                         return;
                     }
-            
-  
+        
+                    
                     try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME_PRODUCT))) {
                         for (Products p : products) {
                             writer.write(p.toString());
@@ -1507,26 +1774,22 @@ import java.awt.*;
                         }
                         JOptionPane.showMessageDialog(null, "Product updated successfully!", 
                                                    "Success", JOptionPane.INFORMATION_MESSAGE);
-                                                   
                         
+                        
+                        EditName.setText("");
                         EditPrice.setText("");
                         EditStock.setText("");
                         window.dispose();
                         SwingUtilities.invokeLater(() -> POS());
-                        
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(null, "Error saving product data: " + ex.getMessage(), 
                                                    "Error", JOptionPane.ERROR_MESSAGE);
                         ex.printStackTrace();
                     }
-            
+        
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(null, "Please enter valid numbers for price and stock!", 
                                                "Invalid Input", JOptionPane.ERROR_MESSAGE);
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(null, "An unexpected error occurred: " + ex.getMessage(), 
-                                               "Error", JOptionPane.ERROR_MESSAGE);
-                    ex.printStackTrace();
                 }
             });
            
