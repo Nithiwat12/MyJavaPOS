@@ -167,7 +167,8 @@ import java.awt.*;
             if(choice == null || choice.isEmpty() ){
                 String alert = "No this choice, please input again";
                 JOptionPane.showMessageDialog(null, alert, "Message", JOptionPane.INFORMATION_MESSAGE);
-                done = true;
+                done = false;
+                return;
             }
 
             if(choice.equals("1")){
@@ -213,10 +214,11 @@ import java.awt.*;
                     3. Exit\n
                     """;
             String choice = JOptionPane.showInputDialog(null, Menu, "Point of Sale", JOptionPane.QUESTION_MESSAGE);
-            if (choice == null) {
+            if(choice == null || choice.isEmpty() ){
+                String alert = "No this choice, please input again";
+                JOptionPane.showMessageDialog(null, alert, "Message", JOptionPane.INFORMATION_MESSAGE);
                 done = true;
                 SwingUtilities.invokeLater(() -> POS());
-                return;
             }
             if(choice.equals("1")){
                 showProduct();
@@ -1289,10 +1291,11 @@ import java.awt.*;
                     5. Exit \n
                     """;
             String choice = JOptionPane.showInputDialog(null, Menu, "Point of Sale", JOptionPane.QUESTION_MESSAGE);
-            if(choice == null){
+            if(choice == null || choice.isEmpty() ){
                 done = true;
-                POS();
-                return;
+                JOptionPane.showMessageDialog(null, "Cannoy choice", "Error", JOptionPane.INFORMATION_MESSAGE);
+                SwingUtilities.invokeLater(() -> POS());
+                
             }
             
             if(choice.equals("1")){
@@ -1310,11 +1313,6 @@ import java.awt.*;
             else if(choice.equals("5")){
                 done = true;
                 SwingUtilities.invokeLater(() -> POS());
-                return;
-            }
-            else{
-                JOptionPane.showMessageDialog(null, "Cannoy choice", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
             }
         }
         public void Edit_Member(){
