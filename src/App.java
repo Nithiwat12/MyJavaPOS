@@ -167,8 +167,7 @@ import java.awt.*;
             if(choice == null || choice.isEmpty() ){
                 String alert = "No this choice, please input again";
                 JOptionPane.showMessageDialog(null, alert, "Message", JOptionPane.INFORMATION_MESSAGE);
-                done = false;
-                return;
+                done = true;
             }
 
             if(choice.equals("1")){
@@ -592,8 +591,7 @@ import java.awt.*;
             textarea_cart.setWrapStyleWord(true);
 
            
-            
-
+        
             StringBuilder receip = new StringBuilder();
 
             receip.append("Name :\tQuantity :\n\n");
@@ -1079,6 +1077,7 @@ import java.awt.*;
             if (id.isEmpty() || name.isEmpty() || priceText.isEmpty()|| stockText.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Please fill all fields!", "Error", JOptionPane.ERROR_MESSAGE);
                 SwingUtilities.invokeLater(() -> POS());
+                done = true;
                 return;
             }
             
@@ -1652,7 +1651,7 @@ import java.awt.*;
                 SwingUtilities.invokeLater(() -> POS());
                 done = true;
             }
-             window = new JFrame("Point of Sale - Edit Product");
+            window = new JFrame("Point of Sale - Edit Product");
             window.setSize(600, 400); 
             window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             window.setLocationRelativeTo(null);
