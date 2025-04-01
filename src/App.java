@@ -383,6 +383,7 @@ import java.awt.*;
                 });
                 
                 BBack.addActionListener(e -> {
+                    done = true;
                     window.dispose();
                     SwingUtilities.invokeLater(() -> POS());
                 });
@@ -600,8 +601,8 @@ import java.awt.*;
             scrollcart.setPreferredSize(new Dimension(350,200));
 
             BBacksale = new JButton("Back");
-            BSubsale = new JButton("Submit");
-            BCancelsale = new JButton("Sale");   
+            BSubsale = new JButton("Add Cart");
+            BCancelsale = new JButton("Next");   
             BBacksale.addActionListener(e ->  {
                 window.dispose();
                 done = true;
@@ -1714,6 +1715,9 @@ import java.awt.*;
                 if (productName == null || productName.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Please select a product to edit!", 
                                                "Error", JOptionPane.ERROR_MESSAGE);
+                                               window.dispose();
+                        SwingUtilities.invokeLater(() -> POS());
+                        done = true;
                     return;
                 }
         
@@ -1727,6 +1731,9 @@ import java.awt.*;
                         if (price <= 0) {
                             JOptionPane.showMessageDialog(null, "Price must be positive!", 
                                                        "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                                                       window.dispose();
+                        SwingUtilities.invokeLater(() -> POS());
+                        done = true;
                             return;
                         }
                     }
@@ -1736,6 +1743,9 @@ import java.awt.*;
                         if (stock < 0) {
                             JOptionPane.showMessageDialog(null, "Stock cannot be negative!", 
                                                        "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                                                       window.dispose();
+                        SwingUtilities.invokeLater(() -> POS());
+                        done = true;
                             return;
                         }
                     }
@@ -1763,6 +1773,9 @@ import java.awt.*;
                     if (!productFound) {
                         JOptionPane.showMessageDialog(null, "Product not found in database!", 
                                                    "Error", JOptionPane.ERROR_MESSAGE);
+                                                   window.dispose();
+                        SwingUtilities.invokeLater(() -> POS());
+                        done = true;
                         return;
                     }
         
@@ -1781,15 +1794,22 @@ import java.awt.*;
                         EditStock.setText("");
                         window.dispose();
                         SwingUtilities.invokeLater(() -> POS());
+                        done = true;
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(null, "Error saving product data: " + ex.getMessage(), 
                                                    "Error", JOptionPane.ERROR_MESSAGE);
                         ex.printStackTrace();
+                        window.dispose();
+                        SwingUtilities.invokeLater(() -> POS());
+                        done = true;
                     }
         
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(null, "Please enter valid numbers for price and stock!", 
                                                "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                                               window.dispose();
+                        SwingUtilities.invokeLater(() -> POS());
+                        done = true;
                 }
             });
            
