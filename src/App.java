@@ -38,6 +38,12 @@ import java.awt.*;
         public String setName(String name){
             return this.Name = name;
         }
+        public String setID(String id){
+            return this.ID = id;
+            }
+            public String getID() {
+                return ID;
+            }
     }
 
     class Products{
@@ -59,7 +65,9 @@ import java.awt.*;
         public String getName() {
             return Name;
         }
-
+        public String getID() {
+            return ID;
+        }
         public int setPrice(int price){
             return this.price = price;
         }
@@ -69,6 +77,10 @@ import java.awt.*;
         public String setName(String name){
             return this.Name = name;
         }
+        public String setID(String id){
+        return this.ID = id;
+        }
+
         }
         class Sales {
             String ID;
@@ -613,6 +625,7 @@ import java.awt.*;
             BBacksale.addActionListener(e ->  {
                 window.dispose();
                 done = true;
+                order.clear();
                 SwingUtilities.invokeLater(() -> POS());
             }); 
             panel_B = new JPanel();
@@ -822,6 +835,7 @@ import java.awt.*;
             closeButton.addActionListener(e -> {
                 window.dispose();
                 done = true;
+                order.clear();
                 SwingUtilities.invokeLater(() -> POS());  
             });
 
@@ -1349,11 +1363,18 @@ import java.awt.*;
             panel_editname.add(label_editname);
             panel_editname.add(EditName);
 
+            JPanel panel_editID = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JLabel label_editID = new JLabel("Enter New ID: ");
+            JTextField EditID = new JTextField(15);
+            EditID.setPreferredSize(new Dimension(350, 30));
+            panel_editID.add(label_editID);
+            panel_editID.add(EditID);
+
             formPanel.add(panel_EditProduct);
             formPanel.add(Box.createVerticalStrut(15));
             formPanel.add(panel_editname);
             formPanel.add(Box.createVerticalStrut(15));
-
+            formPanel.add(panel_editID);
             
             panel_BEdit = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             BSEdit = new JButton("Submit");
@@ -1368,27 +1389,42 @@ import java.awt.*;
             BSEdit.addActionListener(e -> {
                 String productName = (String) EditProduct.getSelectedItem();
                 String name = EditName.getText().trim();
-                
+                String id = EditID.getText().trim();
+
                 if (productName == null || productName.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Please select a product!", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
             
 
-                  
-            
-                    
-                    boolean productFound = false;
+                boolean productFound = false;
+                boolean idExists = false;
+                
+                for (Users p : members) {
+                    if (p.getID().equals(id)) {
+                        idExists = true;
+                        break;
+                    }
+                }
+                if (idExists) {
+                    JOptionPane.showMessageDialog(null, "This ID is already in use.", 
+                                                   "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
                     for (Users p : members) {
                         if (p.getName().equals(productName)) {
                            if(!name.isEmpty()){
                             p.setName(name);
                            }
+                           if(!id.isEmpty()){
+                                p.setID(id);
+                            }
+                           }
                             productFound = true;
                             
                             break;
                         }
-                    }
+                    
             
                     if (!productFound) {
                         JOptionPane.showMessageDialog(null, "Members not found in database!", 
@@ -1676,6 +1712,12 @@ import java.awt.*;
             panel_editname.add(label_editname);
             panel_editname.add(EditName);
             
+            JPanel panel_editID = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JLabel label_editID = new JLabel("Enter New ID: ");
+            JTextField EditID = new JTextField(15);
+            EditID.setPreferredSize(new Dimension(350, 30));
+            panel_editID.add(label_editID);
+            panel_editID.add(EditID);
 
             panel_editprice = new JPanel(new FlowLayout(FlowLayout.LEFT));
             label_editprice = new JLabel("Enter New Price: ");
@@ -1697,6 +1739,8 @@ import java.awt.*;
             formPanel.add(Box.createVerticalStrut(15));
             formPanel.add(panel_editname);
             formPanel.add(Box.createVerticalStrut(15));
+            formPanel.add(panel_editID);
+            formPanel.add(Box.createVerticalStrut(15));
             formPanel.add(panel_editprice);
             formPanel.add(Box.createVerticalStrut(15));
             formPanel.add(panel_editstock);
@@ -1717,7 +1761,7 @@ import java.awt.*;
                 String priceText = EditPrice.getText().trim();
                 String stockText = EditStock.getText().trim();
                 String nameText = EditName.getText().trim();
-        
+                String id = EditID.getText().trim();
                 
                 if (productName == null || productName.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Please select a product to edit!", 
@@ -1756,9 +1800,20 @@ import java.awt.*;
                             return;
                         }
                     }
-        
-                    
                     boolean productFound = false;
+                    boolean idExists = false;
+                    for (Products p : products) {
+                        if (p.getID().equals(id)) {
+                            idExists = true;
+                            break;
+                        }
+                    }
+                    if (idExists) {
+                        JOptionPane.showMessageDialog(null, "This ID is already in use.", 
+                                                       "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
                     for (Products p : products) {
                         if (p.getName().equals(productName)) {
                             
@@ -1770,6 +1825,9 @@ import java.awt.*;
                             }
                             if (stock != null) {
                                 p.setStock(stock);
+                            }
+                            if(id != null){
+                                p.setID(id);
                             }
                             
                             productFound = true;
