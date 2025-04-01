@@ -835,6 +835,29 @@ import java.awt.*;
             closeButton.addActionListener(e -> {
                 window.dispose();
                 done = true;
+                
+                for (Order o : order) {
+                    for (Products p : products) {
+                        if (o.nameProduct.equals(p.Name)) {
+                        p.Stock += o.countProduct;
+
+                        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME_PRODUCT))) {
+                            for (Products prod : products) {
+                                if (prod.Stock > 0) {
+                                    writer.write(prod.toString());
+                                    writer.newLine();
+                                }
+                            }
+                        } catch (IOException ex) {
+                            JOptionPane.showMessageDialog(null, 
+                                "Error saving updated product data!", 
+                                "Error", 
+                                JOptionPane.ERROR_MESSAGE);
+                        }
+                        break;
+                        }
+                    }
+                }
                 order.clear();
                 SwingUtilities.invokeLater(() -> POS());  
             });
